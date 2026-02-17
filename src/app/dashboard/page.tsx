@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRole } from '@/hooks/useRole';
 import { useProgress } from '@/hooks/useProgress';
+import { useToolLinks } from '@/hooks/useToolLinks';
 import { curriculum } from '@/data/curriculum';
 import {
   getOverallProgress,
@@ -21,6 +22,7 @@ import OverallProgress from '@/components/dashboard/OverallProgress';
 import DayCard from '@/components/dashboard/DayCard';
 import RecentActivity from '@/components/dashboard/RecentActivity';
 import DashboardFeedbackForm from '@/components/feedback/DashboardFeedbackForm';
+import ToolLinksEditor from '@/components/dashboard/ToolLinksEditor';
 
 // Hardcoded day info for days that don't have curriculum data yet
 const dayInfoFallback = [
@@ -36,15 +38,6 @@ const dayInfoFallback = [
   { dayId: 10, title: 'ビジネスツール & 卒業', emoji: '🎯' },
 ];
 
-// Tool links for intern dashboard
-const internToolLinks = [
-  { name: 'ChatGPT', url: 'https://chat.openai.com', emoji: '💬', description: 'AIチャットで質問・相談' },
-  { name: 'Gemini', url: 'https://gemini.google.com', emoji: '✨', description: 'Google AIで検索・分析' },
-  { name: 'NotebookLM', url: 'https://notebooklm.google.com', emoji: '📓', description: '資料の分析・要約' },
-  { name: 'Notion', url: 'https://www.notion.so', emoji: '📝', description: 'ドキュメント・タスク管理' },
-  { name: 'Slack', url: 'https://slack.com', emoji: '💼', description: 'チームコミュニケーション' },
-  { name: 'Backlog', url: 'https://backlog.com', emoji: '📋', description: 'プロジェクト管理' },
-];
 
 interface RecentActivityItem {
   questTitle: string;
@@ -57,8 +50,10 @@ export default function DashboardPage() {
   const { role, loading: roleLoading } = useRole();
   const { completions, loading: progressLoading } = useProgress();
   const { streak } = useStreak();
+  const { toolLinks, updateToolLinks, resetToolLinks } = useToolLinks();
   const [recentActivities, setRecentActivities] = useState<RecentActivityItem[]>([]);
   const [activitiesLoading, setActivitiesLoading] = useState(true);
+  const [isToolLinksEditorOpen, setIsToolLinksEditorOpen] = useState(false);
 
   const isIntern = role === 'student-intern';
   const totalDays = getTotalDays(role);
@@ -283,11 +278,33 @@ export default function DashboardPage() {
         {/* Tool Links Section (Intern only) */}
         {isIntern && (
           <div>
-            <h2 className="text-xl font-bold text-text-primary mb-4">
-              ツールリンク集
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-text-primary">
+                ツールリンク集
+              </h2>
+              <button
+                onClick={() => setIsToolLinksEditorOpen(true)}
+                className="p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors cursor-pointer"
+                aria-label="ツールリンクを編集"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                  />
+                </svg>
+              </button>
+            </div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {internToolLinks.map((tool) => (
+              {toolLinks.map((tool) => (
                 <a
                   key={tool.name}
                   href={tool.url}
@@ -307,6 +324,13 @@ export default function DashboardPage() {
                 </a>
               ))}
             </div>
+            <ToolLinksEditor
+              isOpen={isToolLinksEditorOpen}
+              onClose={() => setIsToolLinksEditorOpen(false)}
+              toolLinks={toolLinks}
+              onSave={updateToolLinks}
+              onReset={resetToolLinks}
+            />
           </div>
         )}
 
