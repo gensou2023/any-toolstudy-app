@@ -141,8 +141,19 @@ export default function LoginPage() {
           </form>
         </div>
 
+        {/* Demo credentials */}
+        <div className="mt-6 bg-surface border border-border rounded-xl p-4">
+          <p className="text-xs font-semibold text-text-secondary mb-2">
+            🎮 デモ用ログイン情報
+          </p>
+          <div className="space-y-1 text-xs text-text-muted">
+            <p>ニックネーム: <span className="font-mono text-text-primary">お好きな名前</span></p>
+            <p>パスワード: <span className="font-mono text-text-primary">cursor-dojo-2024</span></p>
+          </div>
+        </div>
+
         {/* Footer */}
-        <p className="text-center text-text-muted text-xs mt-6">
+        <p className="text-center text-text-muted text-xs mt-4">
           Cursor AI を活用した開発スキルを身につけるための5日間プログラム
         </p>
       </div>

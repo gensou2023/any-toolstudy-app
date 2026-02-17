@@ -16,7 +16,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate password
-    if (password !== process.env.AUTH_PASSWORD) {
+    const authPassword = process.env.AUTH_PASSWORD || 'cursor-dojo-2024';
+    if (password !== authPassword) {
       return NextResponse.json(
         { error: 'パスワードが正しくありません' },
         { status: 401 }
