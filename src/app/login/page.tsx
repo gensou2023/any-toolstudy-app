@@ -147,7 +147,7 @@ export default function LoginPage() {
             🎮 デモ用ログイン情報
           </p>
           <div className="space-y-1 text-xs text-text-muted">
-            <p>ニックネーム: <span className="font-mono text-text-primary">お好きな名前</span></p>
+            <p>ニックネーム: <span className="font-mono text-text-primary">TenJIn</span></p>
             <p>パスワード: <span className="font-mono text-text-primary">cursor-dojo-2024</span></p>
           </div>
         </div>
