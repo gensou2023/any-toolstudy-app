@@ -43,6 +43,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Demo mode: return mock success without writing to Supabase
+    if (IS_DEMO_MODE) {
+      return NextResponse.json({
+        success: true,
+        feedback: {
+          id: `demo-${Date.now()}`,
+          user_id: authData.userId,
+          nickname: authData.nickname,
+          quest_id: questId || null,
+          quest_title: questTitle || null,
+          rating: rating || null,
+          comment: comment || null,
+          type,
+          created_at: new Date().toISOString(),
+        },
+      });
+    }
+
     const { data, error } = await supabase
       .from('feedbacks')
       .insert({
