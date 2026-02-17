@@ -6,6 +6,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 import { IS_DEMO_MODE } from '@/lib/constants';
 import { getRoleById } from '@/data/roles';
+import { curriculum } from '@/data/curriculum';
+import { getXPForDifficulty, getLevelForXP } from '@/lib/gamification';
 import type { User } from '@/types';
 
 interface RankedUser {
@@ -13,28 +15,65 @@ interface RankedUser {
   nickname: string;
   role: string | null;
   completedCount: number;
+  xp: number;
+  level: ReturnType<typeof getLevelForXP>;
+}
+
+// Calculate XP from a list of completed quest IDs
+function calculateXPFromQuestIds(questIds: string[]): number {
+  let xp = 0;
+  for (const day of curriculum) {
+    for (const quest of day.quests) {
+      if (questIds.includes(quest.id)) {
+        xp += getXPForDifficulty(quest.difficulty);
+      }
+    }
+  }
+  return xp;
 }
 
 export default function RankingPage() {
   const { user, loading: authLoading } = useAuth();
   const [rankedUsers, setRankedUsers] = useState<RankedUser[]>([]);
   const [loading, setLoading] = useState(true);
-  const [maxQuests, setMaxQuests] = useState(0);
+  const [maxXP, setMaxXP] = useState(1);
 
   useEffect(() => {
     const fetchRanking = async () => {
       if (IS_DEMO_MODE) {
-        const demoRanking: RankedUser[] = [
-          { id: 'demo-user-001', nickname: 'デモユーザー', role: 'frontend-engineer', completedCount: 6 },
-          { id: 'demo-user-002', nickname: '田中太郎', role: 'backend-engineer', completedCount: 10 },
-          { id: 'demo-user-003', nickname: '佐藤花子', role: 'web-designer', completedCount: 8 },
-          { id: 'demo-user-004', nickname: '鈴木一郎', role: 'director', completedCount: 5 },
-          { id: 'demo-user-005', nickname: '高橋美咲', role: 'non-engineer', completedCount: 4 },
-          { id: 'demo-user-006', nickname: '伊藤健太', role: 'frontend-engineer', completedCount: 3 },
-          { id: 'demo-user-007', nickname: '渡辺雅子', role: 'backend-engineer', completedCount: 2 },
+        const demoCompletions: Record<string, string[]> = {
+          'demo-user-001': ['day1-quest1', 'day1-quest2', 'day1-quest3', 'day1-quest4', 'day2-quest1', 'day2-quest2'],
+          'demo-user-002': ['day1-quest1', 'day1-quest2', 'day1-quest3', 'day1-quest4', 'day1-quest5', 'day1-quest6', 'day2-quest1', 'day2-quest2', 'day2-quest3', 'day2-quest4'],
+          'demo-user-003': ['day1-quest1', 'day1-quest2', 'day1-quest3', 'day1-quest4', 'day1-quest5', 'day1-quest6', 'day2-quest1', 'day2-quest2'],
+          'demo-user-004': ['day1-quest1', 'day1-quest2', 'day1-quest3', 'day1-quest4', 'day1-quest5'],
+          'demo-user-005': ['day1-quest1', 'day1-quest2', 'day1-quest3', 'day1-quest4'],
+          'demo-user-006': ['day1-quest1', 'day1-quest2', 'day1-quest3'],
+          'demo-user-007': ['day1-quest1', 'day1-quest2'],
+        };
+
+        const demoUsers = [
+          { id: 'demo-user-001', nickname: 'デモユーザー', role: 'frontend-engineer' },
+          { id: 'demo-user-002', nickname: '田中太郎', role: 'backend-engineer' },
+          { id: 'demo-user-003', nickname: '佐藤花子', role: 'web-designer' },
+          { id: 'demo-user-004', nickname: '鈴木一郎', role: 'director' },
+          { id: 'demo-user-005', nickname: '高橋美咲', role: 'non-engineer' },
+          { id: 'demo-user-006', nickname: '伊藤健太', role: 'frontend-engineer' },
+          { id: 'demo-user-007', nickname: '渡辺雅子', role: 'backend-engineer' },
         ];
-        demoRanking.sort((a, b) => b.completedCount - a.completedCount);
-        setMaxQuests(demoRanking[0].completedCount);
+
+        const demoRanking: RankedUser[] = demoUsers.map((u) => {
+          const quests = demoCompletions[u.id] || [];
+          const xp = calculateXPFromQuestIds(quests);
+          return {
+            ...u,
+            completedCount: quests.length,
+            xp,
+            level: getLevelForXP(xp),
+          };
+        });
+
+        demoRanking.sort((a, b) => b.xp - a.xp);
+        setMaxXP(demoRanking[0]?.xp || 1);
         setRankedUsers(demoRanking);
         setLoading(false);
         return;
@@ -52,29 +91,37 @@ export default function RankingPage() {
 
         const { data: completions, error: completionsError } = await supabase
           .from('quest_completions')
-          .select('user_id');
+          .select('user_id, quest_id');
 
         if (completionsError) {
           setLoading(false);
           return;
         }
 
-        const countMap: Record<string, number> = {};
+        // Group quest IDs by user
+        const userQuests: Record<string, string[]> = {};
         (completions || []).forEach((row) => {
-          countMap[row.user_id] = (countMap[row.user_id] || 0) + 1;
+          if (!userQuests[row.user_id]) userQuests[row.user_id] = [];
+          userQuests[row.user_id].push(row.quest_id);
         });
 
-        const ranked: RankedUser[] = (users as User[]).map((u) => ({
-          id: u.id,
-          nickname: u.nickname,
-          role: u.role,
-          completedCount: countMap[u.id] || 0,
-        }));
+        const ranked: RankedUser[] = (users as User[]).map((u) => {
+          const quests = userQuests[u.id] || [];
+          const xp = calculateXPFromQuestIds(quests);
+          return {
+            id: u.id,
+            nickname: u.nickname,
+            role: u.role,
+            completedCount: quests.length,
+            xp,
+            level: getLevelForXP(xp),
+          };
+        });
 
-        ranked.sort((a, b) => b.completedCount - a.completedCount);
+        ranked.sort((a, b) => b.xp - a.xp);
 
-        const max = ranked.length > 0 ? ranked[0].completedCount : 0;
-        setMaxQuests(max > 0 ? max : 1);
+        const max = ranked.length > 0 ? ranked[0].xp : 1;
+        setMaxXP(max > 0 ? max : 1);
 
         setRankedUsers(ranked);
       } catch {
@@ -138,7 +185,7 @@ export default function RankingPage() {
             🏆 チームランキング
           </h1>
           <p className="text-text-secondary">
-            クエスト完了数で競い合おう！
+            XPを稼いでランキング上位を目指そう！
           </p>
         </div>
 
@@ -151,11 +198,12 @@ export default function RankingPage() {
         ) : (
           <div className="bg-surface rounded-xl border border-border overflow-hidden">
             {/* Table header */}
-            <div className="grid grid-cols-[60px_1fr_auto_120px] md:grid-cols-[60px_1fr_150px_120px] items-center px-4 py-3 bg-surface-hover border-b border-border">
+            <div className="grid grid-cols-[50px_1fr_auto_140px] md:grid-cols-[50px_1fr_100px_150px_140px] items-center px-4 py-3 bg-surface-hover border-b border-border">
               <span className="text-xs font-semibold text-text-muted text-center">順位</span>
               <span className="text-xs font-semibold text-text-muted">ニックネーム</span>
               <span className="text-xs font-semibold text-text-muted hidden md:block">ロール</span>
-              <span className="text-xs font-semibold text-text-muted text-right">完了クエスト</span>
+              <span className="text-xs font-semibold text-text-muted hidden md:block text-center">レベル</span>
+              <span className="text-xs font-semibold text-text-muted text-right">XP / クエスト</span>
             </div>
 
             {/* Ranking rows */}
@@ -167,7 +215,7 @@ export default function RankingPage() {
               return (
                 <div
                   key={rankedUser.id}
-                  className={`grid grid-cols-[60px_1fr_auto_120px] md:grid-cols-[60px_1fr_150px_120px] items-center px-4 py-3
+                  className={`grid grid-cols-[50px_1fr_auto_140px] md:grid-cols-[50px_1fr_100px_150px_140px] items-center px-4 py-3
                     border-b border-border last:border-b-0 transition-colors
                     ${isCurrentUser ? 'bg-primary/5 border-l-4 border-l-primary' : 'hover:bg-surface-hover'}
                     ${rank <= 3 ? 'bg-secondary/5' : ''}`}
@@ -181,7 +229,7 @@ export default function RankingPage() {
                     )}
                   </div>
 
-                  {/* Nickname */}
+                  {/* Nickname + Level (mobile) */}
                   <div className="min-w-0">
                     <p
                       className={`font-medium truncate ${
@@ -195,12 +243,17 @@ export default function RankingPage() {
                         </span>
                       )}
                     </p>
-                    {/* Role on mobile */}
-                    {roleInfo && (
-                      <span className="md:hidden text-xs text-text-muted">
-                        {roleInfo.emoji} {roleInfo.label}
+                    {/* Level + Role on mobile */}
+                    <div className="md:hidden flex items-center gap-2 mt-0.5">
+                      <span className="text-xs text-text-muted">
+                        {rankedUser.level.emoji} Lv.{rankedUser.level.level} {rankedUser.level.title}
                       </span>
-                    )}
+                      {roleInfo && (
+                        <span className="text-xs text-text-muted">
+                          · {roleInfo.emoji} {roleInfo.label}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Role badge (desktop) */}
@@ -209,17 +262,31 @@ export default function RankingPage() {
                       <span
                         className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full text-white ${roleInfo.color}`}
                       >
-                        {roleInfo.emoji} {roleInfo.label}
+                        {roleInfo.emoji}
                       </span>
                     ) : (
                       <span className="text-xs text-text-muted">-</span>
                     )}
                   </div>
 
-                  {/* Completed quests count and progress bar */}
+                  {/* Level (desktop) */}
+                  <div className="hidden md:flex items-center justify-center gap-1">
+                    <span className="text-lg">{rankedUser.level.emoji}</span>
+                    <div>
+                      <p className="text-xs font-semibold text-text-primary">
+                        Lv.{rankedUser.level.level}
+                      </p>
+                      <p className="text-[10px] text-text-muted">{rankedUser.level.title}</p>
+                    </div>
+                  </div>
+
+                  {/* XP and quest count */}
                   <div className="text-right">
-                    <p className="text-sm font-semibold text-text-primary">
-                      {rankedUser.completedCount} クエスト
+                    <p className="text-sm font-bold text-xp-gold-dark">
+                      {rankedUser.xp} XP
+                    </p>
+                    <p className="text-[10px] text-text-muted">
+                      {rankedUser.completedCount} クエスト完了
                     </p>
                     <div className="mt-1 h-1.5 bg-surface-hover rounded-full overflow-hidden">
                       <div
@@ -231,7 +298,7 @@ export default function RankingPage() {
                               : 'bg-primary'
                         }`}
                         style={{
-                          width: `${(rankedUser.completedCount / maxQuests) * 100}%`,
+                          width: `${(rankedUser.xp / maxXP) * 100}%`,
                         }}
                       />
                     </div>

@@ -31,6 +31,7 @@ export default function Sidebar({
 
   const navItems = [
     { href: '/dashboard', label: 'ダッシュボード', emoji: '🏠' },
+    { href: '/search', label: '検索', emoji: '🔍' },
   ];
 
   const bottomNavItems = [
@@ -44,7 +45,7 @@ export default function Sidebar({
   };
 
   return (
-    <aside className={`${mobile ? 'flex' : 'hidden md:flex'} flex-col w-64 ${mobile ? 'relative' : 'fixed left-0 top-16 bottom-0'} bg-white border-r border-border overflow-y-auto`}>
+    <aside className={`${mobile ? 'flex' : 'hidden md:flex'} flex-col w-64 ${mobile ? 'relative' : 'fixed left-0 top-16 bottom-0'} bg-surface border-r border-border overflow-y-auto`}>
       <nav className="flex-1 py-4">
         {/* Main navigation */}
         <div className="px-3 mb-2">

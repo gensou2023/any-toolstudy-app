@@ -36,7 +36,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 animate-[fadeIn_200ms_ease-out]"
+        className="absolute inset-0 bg-black/50 animate-modal-fade-in"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -44,7 +44,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
       {/* Modal content */}
       <div
         className="relative z-10 w-full max-w-lg mx-4 bg-surface rounded-2xl shadow-2xl border border-border
-          animate-[modalIn_200ms_ease-out]"
+          animate-modal-in"
         role="dialog"
         aria-modal="true"
         aria-label={title}
@@ -96,27 +96,6 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
         <div className="px-6 py-4">{children}</div>
       </div>
 
-      {/* Keyframe styles */}
-      <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-        @keyframes modalIn {
-          from {
-            opacity: 0;
-            transform: scale(0.95) translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-          }
-        }
-      `}</style>
     </div>
   );
 }

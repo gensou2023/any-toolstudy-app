@@ -6,9 +6,12 @@ import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { useRole } from '@/hooks/useRole';
 import { useProgress } from '@/hooks/useProgress';
+import { useBadges } from '@/hooks/useBadges';
 import { curriculum, getQuest, getDay } from '@/data/curriculum';
+import { getBadgeById } from '@/data/badges';
 import { isDayUnlocked, getQuestsForRole } from '@/lib/progress';
 import { calculateTotalXP } from '@/lib/gamification';
+import { checkBadgeEligibility } from '@/lib/badges';
 import QuestHeader from '@/components/quest/QuestHeader';
 import QuestSteps from '@/components/quest/QuestSteps';
 import QuestChallenge from '@/components/quest/QuestChallenge';
@@ -16,7 +19,8 @@ import QuestHints from '@/components/quest/QuestHints';
 import QuestCheckQuestions from '@/components/quest/QuestCheckQuestions';
 import QuestCompleteButton from '@/components/quest/QuestCompleteButton';
 import QuestNavigation from '@/components/quest/QuestNavigation';
-import Button from '@/components/ui/Button';
+import FeedbackButton from '@/components/feedback/FeedbackButton';
+import BadgeUnlockModal from '@/components/badges/BadgeUnlockModal';
 
 // Simple layout wrapper
 function PageWrapper({ children }: { children: React.ReactNode }) {
@@ -41,7 +45,9 @@ export default function QuestPage() {
     isQuestCompleted,
   } = useProgress();
 
+  const { earnedBadges, earnBadge } = useBadges();
   const [allQuestionsCorrect, setAllQuestionsCorrect] = useState(false);
+  const [unlockedBadgeId, setUnlockedBadgeId] = useState<string | null>(null);
 
   const dayId = Number(params.dayId);
   const questId = params.questId as string;
@@ -60,7 +66,15 @@ export default function QuestPage() {
 
   const handleComplete = useCallback(async () => {
     await completeQuest(questId);
-  }, [completeQuest, questId]);
+    // Check badge eligibility after completion
+    const updatedCompletions = [...completions, questId];
+    const newBadges = checkBadgeEligibility(updatedCompletions, earnedBadges, curriculum, role);
+    if (newBadges.length > 0) {
+      // Earn the first new badge and show modal
+      await earnBadge(newBadges[0]);
+      setUnlockedBadgeId(newBadges[0]);
+    }
+  }, [completeQuest, questId, completions, earnedBadges, role, earnBadge]);
 
   // Calculate current XP for gamification
   const currentXP = !progressLoading ? calculateTotalXP(completions, curriculum) : 0;
@@ -224,29 +238,7 @@ export default function QuestPage() {
 
       {/* Feedback Button */}
       <div className="mb-8 flex justify-center">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            // Placeholder: feedback modal will be added later
-            alert('フィードバック機能は近日公開予定です');
-          }}
-        >
-          <svg
-            className="h-4 w-4 mr-1.5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-            />
-          </svg>
-          フィードバックを送る
-        </Button>
+        <FeedbackButton questId={questId} questTitle={quest.title} />
       </div>
 
       {/* Navigation */}
@@ -254,6 +246,13 @@ export default function QuestPage() {
         prevQuest={prevQuest}
         nextQuest={nextQuest}
         dayId={dayId}
+      />
+
+      {/* Badge Unlock Modal */}
+      <BadgeUnlockModal
+        badge={unlockedBadgeId ? getBadgeById(unlockedBadgeId) ?? null : null}
+        isOpen={!!unlockedBadgeId}
+        onClose={() => setUnlockedBadgeId(null)}
       />
     </PageWrapper>
   );

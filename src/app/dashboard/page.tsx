@@ -14,6 +14,7 @@ import {
 import { TOTAL_DAYS, IS_DEMO_MODE } from '@/lib/constants';
 import { supabase } from '@/lib/supabase';
 import { calculateTotalXP, getLevelForXP, getXPForDifficulty } from '@/lib/gamification';
+import { useStreak } from '@/hooks/useStreak';
 import AppLayout from '@/components/layout/AppLayout';
 import WelcomeHero from '@/components/dashboard/WelcomeHero';
 import OverallProgress from '@/components/dashboard/OverallProgress';
@@ -39,6 +40,7 @@ export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useRole();
   const { completions, loading: progressLoading } = useProgress();
+  const { streak } = useStreak();
   const [recentActivities, setRecentActivities] = useState<RecentActivityItem[]>([]);
   const [activitiesLoading, setActivitiesLoading] = useState(true);
 
@@ -126,8 +128,7 @@ export default function DashboardPage() {
   const totalXP = isLoading ? 0 : calculateTotalXP(completions, curriculum);
   const currentLevel = getLevelForXP(totalXP);
 
-  // Calculate streak (demo mode = 3, otherwise placeholder)
-  const streak = IS_DEMO_MODE ? 3 : 0;
+  // Streak comes from useStreak() hook
 
   // Calculate daily completions (quests completed today)
   const dailyCompleted = (() => {

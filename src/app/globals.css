@@ -24,6 +24,18 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Dark mode overrides */
+html.dark {
+  --color-background: #0f172a;
+  --color-surface: #1e293b;
+  --color-surface-hover: #334155;
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-text-muted: #64748b;
+  --color-border: #334155;
+  color-scheme: dark;
+}
+
 body {
   background: var(--color-background);
   color: var(--color-text-primary);
@@ -130,7 +142,27 @@ body {
   80% { transform: rotate(5deg); }
 }
 
+/* Modal fade in */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Modal scale in */
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
 /* Utility animation classes */
+.animate-modal-fade-in {
+  animation: fadeIn 200ms ease-out;
+}
+
+.animate-modal-in {
+  animation: modalIn 200ms ease-out;
+}
+
 .animate-bounce-in {
   animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }

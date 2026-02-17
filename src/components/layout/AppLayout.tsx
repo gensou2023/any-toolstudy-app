@@ -6,8 +6,9 @@ import { useRole } from '@/hooks/useRole';
 import { useProgress } from '@/hooks/useProgress';
 import { curriculum } from '@/data/curriculum';
 import { isDayUnlocked, getCompletedCountForDay } from '@/lib/progress';
-import { TOTAL_DAYS, IS_DEMO_MODE } from '@/lib/constants';
+import { TOTAL_DAYS } from '@/lib/constants';
 import { calculateTotalXP } from '@/lib/gamification';
+import { useStreak } from '@/hooks/useStreak';
 import AppHeader from './AppHeader';
 import Sidebar from './Sidebar';
 import MobileNav from './MobileNav';
@@ -20,6 +21,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const { user, loading: authLoading, logout } = useAuth();
   const { role, loading: roleLoading } = useRole();
   const { completions, loading: progressLoading } = useProgress();
+  const { streak } = useStreak();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Calculate unlocked days
@@ -47,9 +49,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
     }
   }, [completions, role, progressLoading, roleLoading]);
 
-  // Calculate XP and streak for the header
+  // Calculate XP for the header
   const xp = !progressLoading ? calculateTotalXP(completions, curriculum) : 0;
-  const streak = IS_DEMO_MODE ? 3 : 0; // Demo streak; real streak would come from backend
 
   // Loading state
   if (authLoading || roleLoading) {
@@ -87,7 +88,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
             className="absolute inset-0 bg-black/30"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <div className="absolute left-0 top-16 bottom-0 w-64 bg-white shadow-xl overflow-y-auto">
+          <div className="absolute left-0 top-16 bottom-0 w-64 bg-surface shadow-xl overflow-y-auto">
             <Sidebar
               completions={completions}
               dayProgress={dayProgress}

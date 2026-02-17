@@ -24,20 +24,20 @@ export default function BadgeUnlockModal({ badge, isOpen, onClose }: BadgeUnlock
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-24 h-24 rounded-full bg-secondary/20 animate-pulse" />
           </div>
-          <span className="relative text-7xl block animate-[bounceIn_600ms_ease-out]">
+          <span className="relative text-7xl block animate-bounce-in">
             {badge.icon}
           </span>
         </div>
 
         {/* Celebration particles */}
-        <div className="flex justify-center gap-2 mb-4 text-2xl animate-[fadeInUp_400ms_ease-out]">
+        <div className="flex justify-center gap-2 mb-4 text-2xl animate-slide-up">
           <span className="animate-bounce" style={{ animationDelay: '0ms' }}>🎉</span>
           <span className="animate-bounce" style={{ animationDelay: '100ms' }}>✨</span>
           <span className="animate-bounce" style={{ animationDelay: '200ms' }}>🎊</span>
         </div>
 
         {/* Congratulations text */}
-        <h2 className="text-2xl font-bold text-secondary mb-2 animate-[fadeInUp_500ms_ease-out]">
+        <h2 className="text-2xl font-bold text-secondary mb-2 animate-slide-up">
           おめでとう！
         </h2>
 
@@ -60,34 +60,6 @@ export default function BadgeUnlockModal({ badge, isOpen, onClose }: BadgeUnlock
         </Button>
       </div>
 
-      <style jsx>{`
-        @keyframes bounceIn {
-          0% {
-            opacity: 0;
-            transform: scale(0.3);
-          }
-          50% {
-            transform: scale(1.1);
-          }
-          70% {
-            transform: scale(0.9);
-          }
-          100% {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </Modal>
   );
 }
