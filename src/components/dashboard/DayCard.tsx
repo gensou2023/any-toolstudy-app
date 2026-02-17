@@ -15,6 +15,7 @@ interface DayCardProps {
   xpAvailable?: number;
   index?: number;
   categoryLabel?: string;
+  isSkippable?: boolean;
 }
 
 function getDifficultyStars(dayId: number): string {
@@ -34,6 +35,7 @@ export default function DayCard({
   xpAvailable = 0,
   index = 0,
   categoryLabel,
+  isSkippable = false,
 }: DayCardProps) {
   const router = useRouter();
   const isCompleted = total > 0 && completed >= total;
@@ -112,9 +114,23 @@ export default function DayCard({
 
       {/* Current indicator */}
       {isCurrent && !isCompleted && (
-        <div className="absolute top-3 right-3">
+        <div className="absolute top-3 right-3 flex items-center gap-1.5">
+          {isSkippable && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-accent/10 text-accent">
+              スキップ可
+            </span>
+          )}
           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary text-white animate-pulse">
             進行中
+          </span>
+        </div>
+      )}
+
+      {/* Skippable badge for non-current days */}
+      {isSkippable && !isCurrent && !isCompleted && (
+        <div className="absolute top-3 right-3">
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-accent/10 text-accent">
+            スキップ可
           </span>
         </div>
       )}

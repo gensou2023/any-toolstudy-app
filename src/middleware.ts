@@ -11,7 +11,7 @@ export function middleware(request: NextRequest) {
   }
 
   // Public paths
-  const publicPaths = ['/login', '/api/auth/login'];
+  const publicPaths = ['/login', '/api/auth/login', '/api/auth/register', '/api/auth/email-login'];
   if (publicPaths.some(p => pathname.startsWith(p))) {
     return NextResponse.next();
   }

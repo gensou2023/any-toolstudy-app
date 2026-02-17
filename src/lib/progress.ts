@@ -35,8 +35,12 @@ export function isDayUnlocked(
   dayId: number,
   completions: string[],
   curriculum: DayCurriculum[],
-  role: RoleId | null
+  role: RoleId | null,
+  overrides: number[] = []
 ): boolean {
+  // If this day is in the overrides list, it's always unlocked
+  if (overrides.includes(dayId)) return true;
+
   const prevDay = getPreviousDayForRole(dayId, role);
   if (prevDay === null) return true;
 

@@ -5,6 +5,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useRole } from '@/hooks/useRole';
 import { useProgress } from '@/hooks/useProgress';
 import { useToolLinks } from '@/hooks/useToolLinks';
+import { useUnlockOverrides } from '@/hooks/useUnlockOverrides';
+import { useAssessment } from '@/hooks/useAssessment';
 import { curriculum } from '@/data/curriculum';
 import {
   getOverallProgress,
@@ -23,6 +25,7 @@ import DayCard from '@/components/dashboard/DayCard';
 import RecentActivity from '@/components/dashboard/RecentActivity';
 import DashboardFeedbackForm from '@/components/feedback/DashboardFeedbackForm';
 import ToolLinksEditor from '@/components/dashboard/ToolLinksEditor';
+import Link from 'next/link';
 
 // Hardcoded day info for days that don't have curriculum data yet
 const dayInfoFallback = [
@@ -51,6 +54,8 @@ export default function DashboardPage() {
   const { completions, loading: progressLoading } = useProgress();
   const { streak } = useStreak();
   const { toolLinks, updateToolLinks, resetToolLinks } = useToolLinks();
+  const { overrides } = useUnlockOverrides();
+  const { isCompleted: assessmentCompleted } = useAssessment();
   const [recentActivities, setRecentActivities] = useState<RecentActivityItem[]>([]);
   const [activitiesLoading, setActivitiesLoading] = useState(true);
   const [isToolLinksEditorOpen, setIsToolLinksEditorOpen] = useState(false);
@@ -173,7 +178,7 @@ export default function DashboardPage() {
   const currentDay = (() => {
     if (isLoading) return 1;
     for (let i = 1; i <= totalDays; i++) {
-      if (!isDayUnlocked(i, completions, curriculum, role)) continue;
+      if (!isDayUnlocked(i, completions, curriculum, role, overrides)) continue;
       const { completed, total } = getCompletedCountForDay(
         i,
         completions,
@@ -200,6 +205,27 @@ export default function DashboardPage() {
           />
         )}
 
+        {/* Assessment prompt for users who haven't completed it */}
+        {!isLoading && !assessmentCompleted && role && (
+          <Link
+            href="/assessment"
+            className="block bg-gradient-to-r from-primary/10 to-secondary/10 rounded-xl border border-primary/20 p-5 hover:border-primary/40 transition-colors"
+          >
+            <div className="flex items-center gap-4">
+              <span className="text-4xl">🎯</span>
+              <div>
+                <h3 className="font-bold text-text-primary">スキルアセスメントを受けよう！</h3>
+                <p className="text-sm text-text-secondary mt-0.5">
+                  あなたのスキルレベルに合わせてカリキュラムをカスタマイズします
+                </p>
+              </div>
+              <svg className="w-6 h-6 text-primary ml-auto flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </Link>
+        )}
+
         {/* Overall Progress */}
         {!isLoading && (
           <OverallProgress
@@ -212,6 +238,27 @@ export default function DashboardPage() {
             isIntern={isIntern}
           />
         )}
+
+        {/* Mini Game Card */}
+        <Link
+          href="/typing"
+          className="block bg-surface rounded-xl border border-border p-5 hover:border-primary/30 hover:bg-primary/5 transition-all group"
+        >
+          <div className="flex items-center gap-4">
+            <span className="text-4xl group-hover:scale-110 transition-transform">⌨️</span>
+            <div>
+              <h3 className="font-bold text-text-primary group-hover:text-primary transition-colors">
+                福岡タイプ道場
+              </h3>
+              <p className="text-sm text-text-secondary mt-0.5">
+                福岡名産品＋IT用語でタイピングスキルを鍛えよう！
+              </p>
+            </div>
+            <svg className="w-6 h-6 text-text-muted group-hover:text-primary ml-auto flex-shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </Link>
 
         {/* Day Cards */}
         <div>
@@ -243,8 +290,11 @@ export default function DashboardPage() {
                   dayInfo.dayId,
                   completions,
                   curriculum,
-                  role
+                  role,
+                  overrides
                 );
+
+                const isOverrideUnlocked = overrides.includes(dayInfo.dayId);
 
                 // Category label for intern days
                 const categoryLabel = isIntern
@@ -268,6 +318,7 @@ export default function DashboardPage() {
                     xpAvailable={getXPForDay(dayInfo.dayId)}
                     index={index}
                     categoryLabel={categoryLabel}
+                    isSkippable={isOverrideUnlocked}
                   />
                 );
               })}

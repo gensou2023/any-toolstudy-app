@@ -4,6 +4,7 @@ import { ReactNode, useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRole } from '@/hooks/useRole';
 import { useProgress } from '@/hooks/useProgress';
+import { useUnlockOverrides } from '@/hooks/useUnlockOverrides';
 import { curriculum } from '@/data/curriculum';
 import { isDayUnlocked, getCompletedCountForDay } from '@/lib/progress';
 import { TOTAL_DAYS } from '@/lib/constants';
@@ -22,6 +23,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const { role, loading: roleLoading } = useRole();
   const { completions, loading: progressLoading } = useProgress();
   const { streak } = useStreak();
+  const { overrides } = useUnlockOverrides();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Calculate unlocked days
@@ -37,7 +39,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       const progress: Record<number, { completed: number; total: number }> = {};
 
       for (let i = 1; i <= TOTAL_DAYS; i++) {
-        if (isDayUnlocked(i, completions, curriculum, role)) {
+        if (isDayUnlocked(i, completions, curriculum, role, overrides)) {
           unlocked.push(i);
         }
         const dayCount = getCompletedCountForDay(i, completions, curriculum, role);
@@ -47,7 +49,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       setUnlockedDays(unlocked);
       setDayProgress(progress);
     }
-  }, [completions, role, progressLoading, roleLoading]);
+  }, [completions, role, progressLoading, roleLoading, overrides]);
 
   // Calculate XP for the header
   const xp = !progressLoading ? calculateTotalXP(completions, curriculum) : 0;

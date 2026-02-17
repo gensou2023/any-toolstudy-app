@@ -38,6 +38,7 @@ export default function Sidebar({
   const navItems = [
     { href: '/dashboard', label: 'ダッシュボード', emoji: '🏠' },
     { href: '/search', label: '検索', emoji: '🔍' },
+    { href: '/typing', label: 'タイプ道場', emoji: '⌨️' },
   ];
 
   // Adjust bottom nav items based on role

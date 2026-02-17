@@ -4,6 +4,9 @@ export interface User {
   id: string;
   nickname: string;
   role: RoleId | null;
+  email?: string;
+  auth_id?: string;
+  skill_level?: string;
   created_at: string;
   last_active_at: string;
 }
@@ -67,6 +70,14 @@ export interface Feedback {
   comment: string | null;
   type: 'quest' | 'general';
   created_at: string;
+}
+
+export interface FeedbackWithUser extends Feedback {
+  user_nickname: string;
+  user_role: RoleId | null;
+  user_level: number;
+  user_xp: number;
+  user_progress: number;
 }
 
 export interface DayCurriculum {
