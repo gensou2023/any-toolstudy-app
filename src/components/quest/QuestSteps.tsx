@@ -1,4 +1,5 @@
 import type { QuestStep } from '@/types';
+import StepContent from './StepContent';
 
 interface QuestStepsProps {
   steps: QuestStep[];
@@ -35,9 +36,9 @@ export default function QuestSteps({ steps }: QuestStepsProps) {
                 <h3 className="font-bold text-text-primary mb-1">
                   {step.title}
                 </h3>
-                <p className="text-text-secondary leading-relaxed">
-                  {step.content}
-                </p>
+                <div>
+                  <StepContent content={step.content} />
+                </div>
               </div>
             </div>
           );
