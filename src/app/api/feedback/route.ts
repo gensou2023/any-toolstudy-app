@@ -65,7 +65,6 @@ export async function POST(request: NextRequest) {
       .from('feedbacks')
       .insert({
         user_id: authData.userId,
-        nickname: authData.nickname,
         quest_id: questId || null,
         quest_title: questTitle || null,
         rating: rating || null,
