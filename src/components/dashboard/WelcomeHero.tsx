@@ -14,6 +14,7 @@ interface WelcomeHeroProps {
   xp?: number;
   streak?: number;
   level?: LevelInfo;
+  isIntern?: boolean;
 }
 
 function getGreeting(): string {
@@ -63,6 +64,7 @@ export default function WelcomeHero({
   xp = 0,
   streak = 0,
   level,
+  isIntern = false,
 }: WelcomeHeroProps) {
   const greeting = getGreeting();
   const message = getMotivationalMessage(progressPercent);
@@ -99,6 +101,11 @@ export default function WelcomeHero({
           <h1 className="text-2xl md:text-3xl font-bold mb-1">
             {greeting}、{nickname}さん！
           </h1>
+          {isIntern && (
+            <p className="text-white/80 text-xs md:text-sm mb-1 font-medium">
+              インターンプログラムへようこそ！
+            </p>
+          )}
           <p className="text-white/90 text-sm md:text-base mb-1">
             {message}
           </p>

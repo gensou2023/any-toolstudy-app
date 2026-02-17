@@ -4,14 +4,18 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import ProgressBar from '@/components/ui/ProgressBar';
 
-// Hardcoded day info for sidebar display
-// This avoids depending on curriculum data that may not be fully available
+// Full day info for sidebar display
 const dayItems = [
   { dayId: 1, title: 'Cursorの世界へようこそ', emoji: '🚀' },
   { dayId: 2, title: 'AIと上手に会話する', emoji: '💬' },
   { dayId: 3, title: '実践コーディング', emoji: '💻' },
   { dayId: 4, title: 'チーム開発の極意', emoji: '🤝' },
   { dayId: 5, title: '総合演習 & 卒業', emoji: '🎓' },
+  { dayId: 6, title: 'HTML/CSS基礎', emoji: '🌐' },
+  { dayId: 7, title: 'JavaScript基礎', emoji: '⚡' },
+  { dayId: 8, title: 'Git入門', emoji: '🔀' },
+  { dayId: 9, title: 'AIツール活用', emoji: '🤖' },
+  { dayId: 10, title: 'ビジネスツール & 卒業', emoji: '🎯' },
 ];
 
 interface SidebarProps {
@@ -19,6 +23,7 @@ interface SidebarProps {
   dayProgress?: Record<number, { completed: number; total: number }>;
   unlockedDays?: number[];
   mobile?: boolean;
+  role?: string | null;
 }
 
 export default function Sidebar({
@@ -26,6 +31,7 @@ export default function Sidebar({
   dayProgress = {},
   unlockedDays = [1],
   mobile = false,
+  role = null,
 }: SidebarProps) {
   const pathname = usePathname();
 
@@ -34,12 +40,19 @@ export default function Sidebar({
     { href: '/search', label: '検索', emoji: '🔍' },
   ];
 
+  // Adjust bottom nav items based on role
+  const isIntern = role === 'student-intern';
   const bottomNavItems = [
-    { href: '/badges', label: 'バッジ', emoji: '🏅' },
-    { href: '/ranking', label: 'ランキング', emoji: '🏆' },
+    { href: isIntern ? '/intern/badges' : '/badges', label: 'バッジ', emoji: '🏅' },
+    { href: isIntern ? '/intern/ranking' : '/ranking', label: 'ランキング', emoji: '🏆' },
     { href: '/feedback', label: 'フィードバック', emoji: '📝' },
     { href: '/select-role', label: 'コース変更', emoji: '🔄' },
   ];
+
+  // Filter visible days based on role
+  const visibleDays = isIntern
+    ? dayItems.filter(d => d.dayId <= 2 || d.dayId >= 6)
+    : dayItems.filter(d => d.dayId <= 5);
 
   const isActive = (href: string) => {
     if (href === '/dashboard') return pathname === '/dashboard';
@@ -71,9 +84,9 @@ export default function Sidebar({
         {/* Day navigation */}
         <div className="px-3 mt-4">
           <p className="px-3 mb-2 text-xs font-semibold text-text-muted uppercase tracking-wider">
-            カリキュラム
+            {isIntern ? 'インターンカリキュラム' : 'カリキュラム'}
           </p>
-          {dayItems.map((day) => {
+          {visibleDays.map((day) => {
             const isLocked = !unlockedDays.includes(day.dayId);
             const href = `/day/${day.dayId}`;
             const active = isActive(href);

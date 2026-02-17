@@ -1,13 +1,16 @@
 'use client';
 
 import { useAuth } from '@/hooks/useAuth';
+import { useRole } from '@/hooks/useRole';
 import { useBadges } from '@/hooks/useBadges';
 import BadgeGrid from '@/components/badges/BadgeGrid';
 import Link from 'next/link';
 
 export default function BadgesPage() {
   const { user, loading: authLoading } = useAuth();
+  const { role } = useRole();
   const { earnedBadges, loading: badgesLoading } = useBadges();
+  const isIntern = role === 'student-intern';
 
   const loading = authLoading || badgesLoading;
 
@@ -52,6 +55,21 @@ export default function BadgesPage() {
             クエストを完了してバッジを集めよう！
           </p>
         </div>
+
+        {/* Intern link */}
+        {isIntern && (
+          <div className="mb-6 text-center">
+            <Link
+              href="/intern/badges"
+              className="inline-flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors font-medium"
+            >
+              インターン専用バッジを見る
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+        )}
 
         {/* Badge grid */}
         <BadgeGrid earnedBadges={earnedBadges} />

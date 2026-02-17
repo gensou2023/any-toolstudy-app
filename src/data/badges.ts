@@ -97,6 +97,55 @@ export const badges: Badge[] = [
     icon: '🏆',
     condition: 'complete-all-quests',
   },
+  // Intern-specific badges (Day 6-10)
+  {
+    id: 'badge-intern-day6-complete',
+    badgeId: 'intern-day6-complete',
+    name: 'Web基礎マスター',
+    description: 'Day 6のHTML/CSS基礎クエストを全て完了した',
+    icon: '🌐',
+    condition: 'complete-day6',
+  },
+  {
+    id: 'badge-intern-day7-complete',
+    badgeId: 'intern-day7-complete',
+    name: 'JS入門クリア',
+    description: 'Day 7のJavaScript基礎クエストを全て完了した',
+    icon: '⚡',
+    condition: 'complete-day7',
+  },
+  {
+    id: 'badge-intern-day8-complete',
+    badgeId: 'intern-day8-complete',
+    name: 'Gitマスター',
+    description: 'Day 8のGit入門クエストを全て完了した',
+    icon: '🔀',
+    condition: 'complete-day8',
+  },
+  {
+    id: 'badge-intern-day9-complete',
+    badgeId: 'intern-day9-complete',
+    name: 'AIツール使い',
+    description: 'Day 9のAIツール活用クエストを全て完了した',
+    icon: '🤖',
+    condition: 'complete-day9',
+  },
+  {
+    id: 'badge-intern-day10-complete',
+    badgeId: 'intern-day10-complete',
+    name: 'インターン卒業',
+    description: 'Day 10のビジネスツール＆卒業クエストを全て完了した',
+    icon: '🎓',
+    condition: 'complete-day10',
+  },
+  {
+    id: 'badge-intern-all-complete',
+    badgeId: 'intern-all-complete',
+    name: 'インターン師範',
+    description: 'インターン専用クエストを全て完了した',
+    icon: '🏅',
+    condition: 'complete-all-intern',
+  },
 ];
 
 export function getBadgeById(badgeId: string): Badge | undefined {

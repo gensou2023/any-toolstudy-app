@@ -23,15 +23,24 @@ export function getDayCompletionRate(
   return completed / roleQuests.length;
 }
 
+// For student-intern, the visible day sequence is: 1, 2, 6, 7, 8, 9, 10
+// Day 6 unlocks based on Day 2 completion (not Day 5)
+function getPreviousDayForRole(dayId: number, role: RoleId | null): number | null {
+  if (dayId === 1) return null;
+  if (role === 'student-intern' && dayId === 6) return 2;
+  return dayId - 1;
+}
+
 export function isDayUnlocked(
   dayId: number,
   completions: string[],
   curriculum: DayCurriculum[],
   role: RoleId | null
 ): boolean {
-  if (dayId === 1) return true;
+  const prevDay = getPreviousDayForRole(dayId, role);
+  if (prevDay === null) return true;
 
-  const prevDayRate = getDayCompletionRate(dayId - 1, completions, curriculum, role);
+  const prevDayRate = getDayCompletionRate(prevDay, completions, curriculum, role);
   return prevDayRate >= DAY_UNLOCK_THRESHOLD;
 }
 

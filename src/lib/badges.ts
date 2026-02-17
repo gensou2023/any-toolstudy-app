@@ -56,6 +56,29 @@ function evaluateCondition(
     case 'complete-day5':
       return isDayComplete(5, completions, curriculum, role);
 
+    case 'complete-day6':
+      return isDayComplete(6, completions, curriculum, role);
+
+    case 'complete-day7':
+      return isDayComplete(7, completions, curriculum, role);
+
+    case 'complete-day8':
+      return isDayComplete(8, completions, curriculum, role);
+
+    case 'complete-day9':
+      return isDayComplete(9, completions, curriculum, role);
+
+    case 'complete-day10':
+      return isDayComplete(10, completions, curriculum, role);
+
+    case 'complete-all-intern': {
+      // Complete all intern-specific quests (Day 6-10)
+      for (let d = 6; d <= 10; d++) {
+        if (!isDayComplete(d, completions, curriculum, role)) return false;
+      }
+      return true;
+    }
+
     case 'complete-5-in-day':
       return completions.length >= 5;
 

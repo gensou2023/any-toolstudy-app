@@ -11,6 +11,7 @@ interface OverallProgressProps {
   xp?: number;
   dailyCompleted?: number;
   dailyGoal?: number;
+  isIntern?: boolean;
 }
 
 export default function OverallProgress({
@@ -20,6 +21,7 @@ export default function OverallProgress({
   xp = 0,
   dailyCompleted = 0,
   dailyGoal = 3,
+  isIntern = false,
 }: OverallProgressProps) {
   const percent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
@@ -70,7 +72,9 @@ export default function OverallProgress({
 
         {/* Middle: Stats + XP */}
         <div className="flex-1 text-center sm:text-left">
-          <h3 className="text-lg font-bold text-text-primary mb-1">全体の進捗</h3>
+          <h3 className="text-lg font-bold text-text-primary mb-1">
+            {isIntern ? 'インターンプログラム進捗' : '全体の進捗'}
+          </h3>
           <p className="text-3xl font-bold text-primary mb-1">
             {completedCount}
             <span className="text-lg text-text-muted font-normal"> / {totalCount} クエスト完了</span>

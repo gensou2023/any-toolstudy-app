@@ -14,6 +14,7 @@ interface DayCardProps {
   isCurrent: boolean;
   xpAvailable?: number;
   index?: number;
+  categoryLabel?: string;
 }
 
 function getDifficultyStars(dayId: number): string {
@@ -32,6 +33,7 @@ export default function DayCard({
   isCurrent,
   xpAvailable = 0,
   index = 0,
+  categoryLabel,
 }: DayCardProps) {
   const router = useRouter();
   const isCompleted = total > 0 && completed >= total;
@@ -126,9 +128,16 @@ export default function DayCard({
           {emoji}
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-bold text-text-primary mb-0.5">
-            Day {dayId}
-          </h3>
+          <div className="flex items-center gap-2 mb-0.5">
+            <h3 className="text-lg font-bold text-text-primary">
+              Day {dayId}
+            </h3>
+            {categoryLabel && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-secondary/10 text-secondary">
+                {categoryLabel}
+              </span>
+            )}
+          </div>
           <p className="text-sm text-text-secondary mb-1 truncate">{title}</p>
 
           {/* Difficulty stars + XP */}

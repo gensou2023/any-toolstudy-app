@@ -93,6 +93,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
               completions={completions}
               dayProgress={dayProgress}
               unlockedDays={unlockedDays}
+              role={role}
               mobile
             />
           </div>
@@ -104,6 +105,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
         completions={completions}
         dayProgress={dayProgress}
         unlockedDays={unlockedDays}
+        role={role}
       />
 
       {/* Main content */}
@@ -114,7 +116,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       </main>
 
       {/* Mobile bottom navigation */}
-      <MobileNav />
+      <MobileNav role={role} />
     </div>
   );
 }

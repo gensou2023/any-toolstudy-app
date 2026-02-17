@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
-import { useRole } from '@/hooks/useRole';
 import { supabase } from '@/lib/supabase';
 import { IS_DEMO_MODE } from '@/lib/constants';
 import { getRoleById } from '@/data/roles';
@@ -20,10 +19,16 @@ interface RankedUser {
   level: ReturnType<typeof getLevelForXP>;
 }
 
-// Calculate XP from a list of completed quest IDs
-function calculateXPFromQuestIds(questIds: string[]): number {
+// Intern quest IDs (Day 6-10)
+const internQuestIds = curriculum
+  .filter((d) => d.dayId >= 6 && d.dayId <= 10)
+  .flatMap((d) => d.quests.map((q) => q.id));
+
+// Calculate XP from intern quests only
+function calculateInternXP(questIds: string[]): number {
   let xp = 0;
   for (const day of curriculum) {
+    if (day.dayId < 6 || day.dayId > 10) continue;
     for (const quest of day.quests) {
       if (questIds.includes(quest.id)) {
         xp += getXPForDifficulty(quest.difficulty);
@@ -33,10 +38,8 @@ function calculateXPFromQuestIds(questIds: string[]): number {
   return xp;
 }
 
-export default function RankingPage() {
+export default function InternRankingPage() {
   const { user, loading: authLoading } = useAuth();
-  const { role } = useRole();
-  const isIntern = role === 'student-intern';
   const [rankedUsers, setRankedUsers] = useState<RankedUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [maxXP, setMaxXP] = useState(1);
@@ -45,31 +48,24 @@ export default function RankingPage() {
     const fetchRanking = async () => {
       if (IS_DEMO_MODE) {
         const demoCompletions: Record<string, string[]> = {
-          'demo-user-001': ['day1-quest1', 'day1-quest2', 'day1-quest3', 'day1-quest4', 'day2-quest1', 'day2-quest2'],
-          'demo-user-002': ['day1-quest1', 'day1-quest2', 'day1-quest3', 'day1-quest4', 'day1-quest5', 'day1-quest6', 'day2-quest1', 'day2-quest2', 'day2-quest3', 'day2-quest4'],
-          'demo-user-003': ['day1-quest1', 'day1-quest2', 'day1-quest3', 'day1-quest4', 'day1-quest5', 'day1-quest6', 'day2-quest1', 'day2-quest2'],
-          'demo-user-004': ['day1-quest1', 'day1-quest2', 'day1-quest3', 'day1-quest4', 'day1-quest5'],
-          'demo-user-005': ['day1-quest1', 'day1-quest2', 'day1-quest3', 'day1-quest4'],
-          'demo-user-006': ['day1-quest1', 'day1-quest2', 'day1-quest3'],
-          'demo-user-007': ['day1-quest1', 'day1-quest2'],
+          'demo-user-001': ['day1-quest1', 'day1-quest2', 'day6-intern-quest1', 'day6-intern-quest2'],
+          'demo-user-008': ['day1-quest1', 'day6-intern-quest1', 'day6-intern-quest2', 'day6-intern-quest3', 'day7-intern-quest1'],
+          'demo-user-009': ['day1-quest1', 'day6-intern-quest1'],
         };
 
         const demoUsers = [
-          { id: 'demo-user-001', nickname: 'デモユーザー', role: 'frontend-engineer' },
-          { id: 'demo-user-002', nickname: '田中太郎', role: 'backend-engineer' },
-          { id: 'demo-user-003', nickname: '佐藤花子', role: 'web-designer' },
-          { id: 'demo-user-004', nickname: '鈴木一郎', role: 'director' },
-          { id: 'demo-user-005', nickname: '高橋美咲', role: 'non-engineer' },
-          { id: 'demo-user-006', nickname: '伊藤健太', role: 'frontend-engineer' },
-          { id: 'demo-user-007', nickname: '渡辺雅子', role: 'backend-engineer' },
+          { id: 'demo-user-001', nickname: 'デモインターン', role: 'student-intern' },
+          { id: 'demo-user-008', nickname: '山田学生', role: 'student-intern' },
+          { id: 'demo-user-009', nickname: '中村研修生', role: 'student-intern' },
         ];
 
         const demoRanking: RankedUser[] = demoUsers.map((u) => {
           const quests = demoCompletions[u.id] || [];
-          const xp = calculateXPFromQuestIds(quests);
+          const internQuests = quests.filter((q) => internQuestIds.includes(q));
+          const xp = calculateInternXP(internQuests);
           return {
             ...u,
-            completedCount: quests.length,
+            completedCount: internQuests.length,
             xp,
             level: getLevelForXP(xp),
           };
@@ -83,9 +79,11 @@ export default function RankingPage() {
       }
 
       try {
+        // Fetch only student-intern users
         const { data: users, error: usersError } = await supabase
           .from('users')
-          .select('*');
+          .select('*')
+          .eq('role', 'student-intern');
 
         if (usersError || !users) {
           setLoading(false);
@@ -101,16 +99,17 @@ export default function RankingPage() {
           return;
         }
 
-        // Group quest IDs by user
+        // Group quest IDs by user, filter to intern quests only
         const userQuests: Record<string, string[]> = {};
         (completions || []).forEach((row) => {
+          if (!internQuestIds.includes(row.quest_id)) return;
           if (!userQuests[row.user_id]) userQuests[row.user_id] = [];
           userQuests[row.user_id].push(row.quest_id);
         });
 
         const ranked: RankedUser[] = (users as User[]).map((u) => {
           const quests = userQuests[u.id] || [];
-          const xp = calculateXPFromQuestIds(quests);
+          const xp = calculateInternXP(quests);
           return {
             id: u.id,
             nickname: u.nickname,
@@ -185,27 +184,25 @@ export default function RankingPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-text-primary mb-2">
-            🏆 チームランキング
+            🎓 インターンランキング
           </h1>
           <p className="text-text-secondary">
-            XPを稼いでランキング上位を目指そう！
+            インターンプログラムのXPでランキング上位を目指そう！
           </p>
         </div>
 
-        {/* Intern link */}
-        {isIntern && (
-          <div className="mb-6 text-center">
-            <Link
-              href="/intern/ranking"
-              className="inline-flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors font-medium"
-            >
-              インターンランキングを見る
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-          </div>
-        )}
+        {/* Link to overall ranking */}
+        <div className="mb-6 text-center">
+          <Link
+            href="/ranking"
+            className="inline-flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors font-medium"
+          >
+            総合ランキングを見る
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+        </div>
 
         {/* Ranking list */}
         {rankedUsers.length === 0 ? (

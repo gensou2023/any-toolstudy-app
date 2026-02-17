@@ -1119,7 +1119,7 @@ export const day3: DayCurriculum = {
       description: 'AIを使ってビジネスシーン別のメールテンプレートを効率的に作成する方法を学びます。',
       difficulty: 2,
       estimatedMinutes: 15,
-      targetRoles: ['non-engineer', 'student-intern'],
+      targetRoles: ['non-engineer'],
       steps: [
         {
           title: 'メールのシーンを設定する',
@@ -1164,7 +1164,7 @@ export const day3: DayCurriculum = {
       description: 'AIを使ってプレゼンテーションのアウトラインやスライド内容を効率的に作成する方法を学びます。',
       difficulty: 2,
       estimatedMinutes: 20,
-      targetRoles: ['non-engineer', 'student-intern'],
+      targetRoles: ['non-engineer'],
       steps: [
         {
           title: 'プレゼンの目的と対象者を決める',
@@ -1209,7 +1209,7 @@ export const day3: DayCurriculum = {
       description: 'AIを使ってデータの変換、CSVフォーマットへの整理、簡単な集計を行う方法を学びます。',
       difficulty: 2,
       estimatedMinutes: 15,
-      targetRoles: ['non-engineer', 'student-intern'],
+      targetRoles: ['non-engineer'],
       steps: [
         {
           title: '整理したいデータを準備する',
@@ -1254,7 +1254,7 @@ export const day3: DayCurriculum = {
       description: 'プログラミング経験がなくても、AIの力で簡単なHTMLページを作成する方法を学びます。',
       difficulty: 3,
       estimatedMinutes: 25,
-      targetRoles: ['non-engineer', 'student-intern'],
+      targetRoles: ['non-engineer'],
       steps: [
         {
           title: 'ページの内容を考える',
@@ -1303,7 +1303,7 @@ export const day3: DayCurriculum = {
       description: '月次レポートや分析レポートの構成と内容をAIに提案させ、効率的にレポートを作成する方法を学びます。',
       difficulty: 2,
       estimatedMinutes: 20,
-      targetRoles: ['non-engineer', 'student-intern'],
+      targetRoles: ['non-engineer'],
       steps: [
         {
           title: 'レポートの目的と種類を決める',
