@@ -2,13 +2,32 @@ import Cookies from 'js-cookie';
 import { COOKIE_NAME } from './constants';
 import type { AuthCookie } from '@/types';
 
+// UTF-8 safe base64 encode/decode
+function utf8ToBase64(str: string): string {
+  const utf8Bytes = new TextEncoder().encode(str);
+  let binary = '';
+  for (let i = 0; i < utf8Bytes.length; i++) {
+    binary += String.fromCharCode(utf8Bytes[i]);
+  }
+  return btoa(binary);
+}
+
+function base64ToUtf8(base64: string): string {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return new TextDecoder().decode(bytes);
+}
+
 export function encodeAuthCookie(data: AuthCookie): string {
-  return btoa(JSON.stringify(data));
+  return utf8ToBase64(JSON.stringify(data));
 }
 
 export function decodeAuthCookie(value: string): AuthCookie | null {
   try {
-    const decoded = JSON.parse(atob(value));
+    const decoded = JSON.parse(base64ToUtf8(value));
     if (decoded.userId && decoded.nickname) {
       return decoded as AuthCookie;
     }

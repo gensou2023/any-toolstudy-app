@@ -38,6 +38,7 @@ export default function Sidebar({
     { href: '/badges', label: 'バッジ', emoji: '🏅' },
     { href: '/ranking', label: 'ランキング', emoji: '🏆' },
     { href: '/feedback', label: 'フィードバック', emoji: '📝' },
+    { href: '/select-role', label: 'コース変更', emoji: '🔄' },
   ];
 
   const isActive = (href: string) => {
