@@ -586,7 +586,7 @@ export const day4: DayCurriculum = {
       description: 'AIを活用してWiki記事を効率的に作成し、ナレッジ共有を推進しよう',
       difficulty: 2,
       estimatedMinutes: 25,
-      targetRoles: ['non-engineer'],
+      targetRoles: ['non-engineer', 'student-intern'],
       steps: [
         {
           title: 'トピックの選定',
@@ -631,7 +631,7 @@ export const day4: DayCurriculum = {
       description: 'よくある質問集をAIと一緒に作成し、問い合わせ対応を効率化しよう',
       difficulty: 2,
       estimatedMinutes: 25,
-      targetRoles: ['non-engineer'],
+      targetRoles: ['non-engineer', 'student-intern'],
       steps: [
         {
           title: '質問の収集',
@@ -676,7 +676,7 @@ export const day4: DayCurriculum = {
       description: '簡単な自動化スクリプトをAIと一緒に作成し、日常業務の効率化を体験しよう',
       difficulty: 3,
       estimatedMinutes: 30,
-      targetRoles: ['non-engineer'],
+      targetRoles: ['non-engineer', 'student-intern'],
       steps: [
         {
           title: '自動化したい作業の特定',

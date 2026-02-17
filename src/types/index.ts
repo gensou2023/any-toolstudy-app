@@ -1,4 +1,4 @@
-export type RoleId = 'frontend-engineer' | 'backend-engineer' | 'web-designer' | 'director' | 'non-engineer';
+export type RoleId = 'frontend-engineer' | 'backend-engineer' | 'web-designer' | 'director' | 'non-engineer' | 'student-intern';
 
 export interface User {
   id: string;
@@ -60,10 +60,12 @@ export interface UserBadge {
 export interface Feedback {
   id: string;
   user_id: string;
-  quest_id: string;
-  quest_title: string;
-  rating: number;
+  nickname?: string;
+  quest_id: string | null;
+  quest_title: string | null;
+  rating: number | null;
   comment: string | null;
+  type: 'quest' | 'general';
   created_at: string;
 }
 

@@ -32,42 +32,58 @@ export async function sendSlackNotification(message: SlackMessage): Promise<bool
 
 export function formatFeedbackMessage(
   nickname: string,
-  questTitle: string,
-  rating: number,
-  comment: string | null
+  questTitle: string | null,
+  rating: number | null,
+  comment: string | null,
+  type: 'quest' | 'general' = 'general'
 ): SlackMessage {
-  const stars = '⭐'.repeat(rating) + '☆'.repeat(5 - rating);
+  const isGeneral = type === 'general';
+  const title = isGeneral ? '一般フィードバック' : questTitle || 'クエスト';
+  const stars = rating ? '⭐'.repeat(rating) + '☆'.repeat(5 - rating) : '（なし）';
+
+  const fields = [
+    {
+      type: 'mrkdwn',
+      text: `*ユーザー:*\n${nickname}`,
+    },
+    {
+      type: 'mrkdwn',
+      text: `*種別:*\n${isGeneral ? '💬 一般' : '📖 クエスト'}`,
+    },
+  ];
+
+  if (!isGeneral && questTitle) {
+    fields.push({
+      type: 'mrkdwn',
+      text: `*クエスト:*\n${questTitle}`,
+    });
+  }
+
+  if (rating) {
+    fields.push({
+      type: 'mrkdwn',
+      text: `*評価:*\n${stars}`,
+    });
+  }
+
+  fields.push({
+    type: 'mrkdwn',
+    text: `*コメント:*\n${comment || '（なし）'}`,
+  });
 
   return {
-    text: `📝 新しいフィードバック: ${questTitle}`,
+    text: `📝 新しいフィードバック: ${title}`,
     blocks: [
       {
         type: 'header',
         text: {
           type: 'plain_text',
-          text: '📝 新しいフィードバック',
+          text: `📝 新しいフィードバック（${isGeneral ? '一般' : 'クエスト'}）`,
         },
       },
       {
         type: 'section',
-        fields: [
-          {
-            type: 'mrkdwn',
-            text: `*ユーザー:*\n${nickname}`,
-          },
-          {
-            type: 'mrkdwn',
-            text: `*クエスト:*\n${questTitle}`,
-          },
-          {
-            type: 'mrkdwn',
-            text: `*評価:*\n${stars}`,
-          },
-          {
-            type: 'mrkdwn',
-            text: `*コメント:*\n${comment || '（なし）'}`,
-          },
-        ],
+        fields,
       },
     ],
   };

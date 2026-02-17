@@ -11,9 +11,11 @@ import type { RoleId } from '@/types';
 export default function SelectRolePage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
-  const { setRole } = useRole();
+  const { role: currentRole, loading: roleLoading, setRole } = useRole();
   const [selectedRole, setSelectedRole] = useState<RoleId | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const isChangingRole = !roleLoading && currentRole !== null;
 
   const handleSubmit = async () => {
     if (!selectedRole) return;
@@ -27,7 +29,7 @@ export default function SelectRolePage() {
     }
   };
 
-  if (authLoading) {
+  if (authLoading || roleLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
@@ -46,7 +48,9 @@ export default function SelectRolePage() {
           </h1>
           {user && (
             <p className="text-lg text-text-secondary">
-              {user.nickname}さん、ようこそ！
+              {isChangingRole
+                ? `${user.nickname}さん、コースを変更しますか？`
+                : `${user.nickname}さん、ようこそ！`}
             </p>
           )}
         </div>
@@ -54,13 +58,14 @@ export default function SelectRolePage() {
         {/* Role Selection Card */}
         <div className="bg-surface rounded-2xl shadow-lg border border-border p-8">
           <h2 className="text-xl font-bold text-text-primary text-center mb-6">
-            あなたの職種を選んでください
+            {isChangingRole ? 'コースを変更' : 'あなたの職種を選んでください'}
           </h2>
 
           {/* Role Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {roles.map((role) => {
               const isSelected = selectedRole === role.id;
+              const isCurrent = currentRole === role.id && !selectedRole;
               return (
                 <button
                   key={role.id}
@@ -71,7 +76,9 @@ export default function SelectRolePage() {
                     ${
                       isSelected
                         ? 'border-primary bg-primary/5 scale-[1.02] shadow-md'
-                        : 'border-border bg-surface hover:border-primary-light hover:bg-surface-hover hover:scale-[1.01]'
+                        : isCurrent
+                          ? 'border-accent bg-accent/5'
+                          : 'border-border bg-surface hover:border-primary-light hover:bg-surface-hover hover:scale-[1.01]'
                     }
                   `}
                 >
@@ -94,6 +101,13 @@ export default function SelectRolePage() {
                     </div>
                   )}
 
+                  {/* Current role indicator */}
+                  {isCurrent && (
+                    <div className="absolute top-3 right-3 px-2 py-0.5 bg-accent/20 text-accent text-xs font-medium rounded-full">
+                      現在
+                    </div>
+                  )}
+
                   {/* Emoji */}
                   <span className="text-4xl mb-3">{role.emoji}</span>
 
@@ -112,11 +126,19 @@ export default function SelectRolePage() {
           </div>
 
           {/* Submit Button */}
-          <div className="mt-8">
+          <div className="mt-8 flex gap-3">
+            {isChangingRole && (
+              <button
+                onClick={() => router.push('/dashboard')}
+                className="flex-1 py-3 px-4 bg-surface hover:bg-surface-hover text-text-secondary font-semibold rounded-xl border border-border transition-all duration-200 cursor-pointer"
+              >
+                キャンセル
+              </button>
+            )}
             <button
               onClick={handleSubmit}
               disabled={!selectedRole || isSubmitting}
-              className="w-full py-3 px-4 bg-primary hover:bg-primary-dark text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 py-3 px-4 bg-primary hover:bg-primary-dark text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               {isSubmitting ? (
                 <span className="flex items-center justify-center gap-2">
@@ -142,6 +164,8 @@ export default function SelectRolePage() {
                   </svg>
                   設定中...
                 </span>
+              ) : isChangingRole ? (
+                'コースを変更する'
               ) : (
                 '次へ進む'
               )}
@@ -151,7 +175,9 @@ export default function SelectRolePage() {
 
         {/* Footer */}
         <p className="text-center text-text-muted text-xs mt-6">
-          職種に応じて最適なクエストが表示されます
+          {isChangingRole
+            ? 'コースを変更すると、表示されるクエストが変わります'
+            : '職種に応じて最適なクエストが表示されます'}
         </p>
       </div>
     </div>

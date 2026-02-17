@@ -36,6 +36,13 @@ export const roles: RoleInfo[] = [
     description: '営業・経理・人事など技術職以外',
     color: 'bg-pink-500',
   },
+  {
+    id: 'student-intern',
+    label: '学生インターン',
+    emoji: '🎓',
+    description: 'インターンシップ中の学生向け基礎コース',
+    color: 'bg-teal-500',
+  },
 ];
 
 export function getRoleById(id: string): RoleInfo | undefined {

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { getRoleById } from '@/data/roles';
 import { getLevelForXP } from '@/lib/gamification';
 import { useTheme } from '@/hooks/useTheme';
@@ -15,6 +16,7 @@ interface AppHeaderProps {
 }
 
 export default function AppHeader({ nickname, role, xp = 0, streak = 0, onMenuToggle, onLogout }: AppHeaderProps) {
+  const router = useRouter();
   const roleInfo = role ? getRoleById(role) : null;
   const level = getLevelForXP(xp);
   const { theme, toggleTheme } = useTheme();
@@ -73,14 +75,16 @@ export default function AppHeader({ nickname, role, xp = 0, streak = 0, onMenuTo
             </span>
           )}
 
-          {/* Role badge */}
+          {/* Role badge (clickable to change role) */}
           {roleInfo && (
-            <span
-              className={`hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium text-white ${roleInfo.color}`}
+            <button
+              onClick={() => router.push('/select-role')}
+              className={`hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium text-white cursor-pointer hover:opacity-80 transition-opacity ${roleInfo.color}`}
+              title="コースを変更する"
             >
               <span>{roleInfo.emoji}</span>
               <span>{roleInfo.label}</span>
-            </span>
+            </button>
           )}
 
           {/* Theme toggle */}

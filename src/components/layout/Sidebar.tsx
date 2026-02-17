@@ -37,6 +37,7 @@ export default function Sidebar({
   const bottomNavItems = [
     { href: '/badges', label: 'バッジ', emoji: '🏅' },
     { href: '/ranking', label: 'ランキング', emoji: '🏆' },
+    { href: '/feedback', label: 'フィードバック', emoji: '📝' },
   ];
 
   const isActive = (href: string) => {

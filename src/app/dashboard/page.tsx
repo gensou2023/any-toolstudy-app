@@ -20,6 +20,7 @@ import WelcomeHero from '@/components/dashboard/WelcomeHero';
 import OverallProgress from '@/components/dashboard/OverallProgress';
 import DayCard from '@/components/dashboard/DayCard';
 import RecentActivity from '@/components/dashboard/RecentActivity';
+import DashboardFeedbackForm from '@/components/feedback/DashboardFeedbackForm';
 
 // Hardcoded day info for days that don't have curriculum data yet
 const dayInfoFallback = [
@@ -252,6 +253,9 @@ export default function DashboardPage() {
         {!activitiesLoading && (
           <RecentActivity activities={recentActivities} />
         )}
+
+        {/* Feedback Form */}
+        <DashboardFeedbackForm />
       </div>
     </AppLayout>
   );
